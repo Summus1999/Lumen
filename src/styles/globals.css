@@ -1,16 +1,149 @@
 @import "tailwindcss";
 
-/* ---- Lumen 基础样式 ---- */
+/* ============================================================
+   Lumen 设计 Token 体系
+   按 design-brief-lumen-ui.json 落地，分三层：
+   1. :root CSS 变量（含基线 6 个 + 扩展语义色/灰阶/毛玻璃/渐变）
+   2. @theme 注册到 Tailwind v4，让 bg-panel/text-muted 等成为原生工具类
+   3. 基础样式 + prose-lumen + 滚动条
+   ============================================================ */
+
 :root {
   color-scheme: dark;
-  --lumen-bg: #0f1115;
-  --lumen-panel: #161a21;
-  --lumen-border: #232932;
-  --lumen-accent: #6aa0ff;
-  --lumen-text: #e6e8ec;
-  --lumen-muted: #8b93a1;
+
+  /* ---- 基线色（保留原命名，向后兼容） ---- */
+  --lumen-bg: #161311;
+  --lumen-panel: #1e1a17;
+  --lumen-border: #2b2521;
+  --lumen-accent: #e8a87c;
+  --lumen-text: #ede6dd;
+  --lumen-muted: #998e80;
+
+  /* ---- 背景层：暖褐黑底，比冷蓝灰更柔和有温度 ---- */
+  --color-bg-default: #161311;
+  --color-bg-elevated: #1e1a17;
+  --color-bg-sunken: #110e0c;
+
+  /* ---- 面板 ---- */
+  --color-panel-default: #1e1a17;
+  --color-panel-glass: rgba(30, 26, 23, 0.72);
+  --color-panel-hover: #25201c;
+
+  /* ---- 边框 ---- */
+  --color-border-subtle: #241f1b;
+  --color-border-default: #2b2521;
+  --color-border-strong: #3a322c;
+  --color-border-accent: rgba(232, 168, 124, 0.5);
+
+  /* ---- 文本：暖白主文字，长时间看不冷 ---- */
+  --color-text-primary: #ede6dd;
+  --color-text-secondary: #998e80;
+  --color-text-tertiary: #6b6258;
+  --color-text-inverse: #161311;
+
+  /* ---- accent 与渐变：琥珀橙，温润不刺眼 ---- */
+  --color-accent-default: #e8a87c;
+  --color-accent-hover: #f5c089;
+  --color-accent-active: #d4946a;
+  --color-accent-gradient: linear-gradient(135deg, #e8a87c 0%, #f0b97d 100%);
+  --color-accent-gradient-subtle: linear-gradient(135deg, rgba(232, 168, 124, 0.15) 0%, rgba(240, 185, 125, 0.12) 100%);
+
+  /* ---- 语义色：调成与暖底协调的色相 ---- */
+  --color-success-default: #8fc97a;
+  --color-success-subtle: rgba(143, 201, 122, 0.12);
+  --color-warning-default: #f0c674;
+  --color-warning-subtle: rgba(240, 198, 116, 0.14);
+  --color-danger-default: #e88b7c;
+  --color-danger-hover: #dd6b5a;
+  --color-danger-subtle: rgba(232, 139, 124, 0.12);
+  --color-info-default: #d4a574;
+  --color-info-subtle: rgba(212, 165, 116, 0.12);
+
+  /* ---- 毛玻璃 ---- */
+  --color-glass-overlay: rgba(22, 19, 17, 0.6);
+  --color-glass-border: rgba(255, 220, 180, 0.08);
+  --color-glass-highlight: rgba(255, 220, 180, 0.05);
+  --blur-glass: blur(12px) saturate(140%);
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+
+  /* ---- 圆角（收敛为 4 档） ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* ---- 阴影/elevation：用暖褐黑而非纯黑，与底色协调 ---- */
+  --shadow-e1: 0 1px 2px rgba(20, 16, 12, 0.4);
+  --shadow-e2: 0 4px 12px rgba(20, 16, 12, 0.5), 0 1px 2px rgba(20, 16, 12, 0.4);
+  --shadow-e3: 0 12px 32px rgba(20, 16, 12, 0.6), 0 4px 8px rgba(20, 16, 12, 0.4);
+  --shadow-accent-glow: 0 0 0 1px rgba(232, 168, 124, 0.28), 0 4px 16px rgba(232, 168, 124, 0.2);
+
+  /* ---- motion ---- */
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --duration-slow: 360ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ============================================================
+   Tailwind v4 @theme 注册
+   把 token 注册成原生工具类，让 bg-panel / text-muted / rounded-lg
+   等不再是任意值类（不再需要 bg-[var(--lumen-panel)] 这种写法）
+   ============================================================ */
+@theme {
+  /* 颜色：bg-* / text-* / border-* 工具类 */
+  --color-bg: var(--color-bg-default);
+  --color-bg-elevated: var(--color-bg-elevated);
+  --color-bg-sunken: var(--color-bg-sunken);
+  --color-panel: var(--color-panel-default);
+  --color-panel-glass: var(--color-panel-glass);
+  --color-panel-hover: var(--color-panel-hover);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border: var(--color-border-default);
+  --color-border-strong: var(--color-border-strong);
+  --color-border-accent: var(--color-border-accent);
+  --color-text: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-muted: var(--color-text-secondary);
+  --color-accent: var(--color-accent-default);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-active: var(--color-accent-active);
+  --color-success: var(--color-success-default);
+  --color-success-subtle: var(--color-success-subtle);
+  --color-warning: var(--color-warning-default);
+  --color-warning-subtle: var(--color-warning-subtle);
+  --color-danger: var(--color-danger-default);
+  --color-danger-hover: var(--color-danger-hover);
+  --color-danger-subtle: var(--color-danger-subtle);
+  --color-info: var(--color-info-default);
+  --color-info-subtle: var(--color-info-subtle);
+
+  /* 圆角：rounded-sm/md/lg/xl 工具类 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* 字体族 */
+  --font-sans: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+  /* 阴影：shadow-e1/e2/e3/accent 工具类 */
+  --shadow-e1: var(--shadow-e1);
+  --shadow-e2: var(--shadow-e2);
+  --shadow-e3: var(--shadow-e3);
+  --shadow-accent: var(--shadow-accent-glow);
+}
+
+/* ============================================================
+   基础样式
+   ============================================================ */
 html,
 body,
 #root {
@@ -20,10 +153,17 @@ body,
 }
 
 body {
-  background: var(--lumen-bg);
-  color: var(--lumen-text);
-  font-family: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui,
-    sans-serif;
+  /* 背景层叠：暖褐底色 + 两团琥珀色径向光晕。
+     光晕是毛玻璃可见的前提——玻璃面板需要"透出后面的东西"，
+     纯色背景下 backdrop-filter 看不出任何效果。光晕很弱（7% 透明），
+     不影响深色基调，但让侧边栏/气泡/Modal 的毛玻璃有内容可透。 */
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 0%, rgba(232, 168, 124, 0.07), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(240, 198, 116, 0.05), transparent 60%),
+    var(--color-bg-default);
+  background-attachment: fixed;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -33,7 +173,96 @@ body {
   box-sizing: border-box;
 }
 
-/* 细滚动条，匹配紧凑的仪表盘风格。 */
+/* ============================================================
+   通用工具类（@theme 无法覆盖的复合样式）
+   ============================================================ */
+
+/* 毛玻璃面板：半透明背景 + backdrop-blur + 玻璃边框 */
+.glass-panel {
+  background: var(--color-panel-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--color-glass-border);
+}
+
+/* accent 渐变背景（按钮、激活态） */
+.bg-accent-gradient {
+  background: var(--color-accent-gradient);
+}
+
+/* accent 渐变文字（品牌名、空状态图标用） */
+.text-accent-gradient {
+  background: var(--color-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* accent 发光阴影 */
+.shadow-accent-glow {
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* focus 态统一的 accent 高光（输入框聚焦） */
+.focus-accent:focus,
+.focus-accent:focus-within {
+  outline: none;
+  border-color: var(--color-accent-default);
+  box-shadow: var(--shadow-accent-glow);
+}
+
+/* ============================================================
+   动画关键帧
+   ============================================================ */
+
+/* Modal 进场：scale + fade */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 遮罩淡入 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 列表项/气泡进场：上滑 + 淡入 */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-base) var(--ease-spring);
+}
+.animate-fade-in {
+  animation: fade-in var(--duration-fast) var(--ease-decelerate);
+}
+.animate-slide-up {
+  animation: slide-up var(--duration-base) var(--ease-decelerate);
+}
+
+/* ============================================================
+   滚动条（细滚动条，匹配紧凑深色风格）
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -42,14 +271,16 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c333d;
+  background: var(--color-border-strong);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a424d;
+  background: #4a4036;
 }
 
-/* 助手消息内部的 Markdown 渲染。 */
+/* ============================================================
+   助手消息内部的 Markdown 渲染
+   ============================================================ */
 .prose-lumen {
   line-height: 1.6;
   word-wrap: break-word;
@@ -69,17 +300,17 @@ body {
   padding-left: 1.4em;
 }
 .prose-lumen code {
-  background: #1d222b;
+  background: var(--color-bg-sunken);
   padding: 0.1em 0.35em;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.88em;
-  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  font-family: var(--font-mono);
 }
 .prose-lumen pre {
-  background: #0c0e12;
-  border: 1px solid var(--lumen-border);
+  background: var(--color-bg-sunken);
+  border: 1px solid var(--color-border-default);
   padding: 0.8em;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow-x: auto;
   margin: 0.6em 0;
 }
@@ -88,15 +319,15 @@ body {
   padding: 0;
 }
 .prose-lumen a {
-  color: var(--lumen-accent);
+  color: var(--color-accent-default);
   text-decoration: none;
 }
 .prose-lumen a:hover {
   text-decoration: underline;
 }
 .prose-lumen blockquote {
-  border-left: 3px solid var(--lumen-border);
+  border-left: 3px solid var(--color-border-default);
   margin: 0.5em 0;
   padding-left: 0.8em;
-  color: var(--lumen-muted);
+  color: var(--color-text-secondary);
 }

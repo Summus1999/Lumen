@@ -1,0 +1,753 @@
+{
+  "meta": {
+    "version": "1.0",
+    "date": "2026-07-05",
+    "locale": "zh-CN",
+    "brand": "Lumen",
+    "design_system": {
+      "source": "internal",
+      "path": "src/styles/globals.css",
+      "tokens_path": "src/styles/globals.css (:root + @theme)",
+      "components_path": "src/components/",
+      "note": "项目从零建立 design token 体系，基线为现有 6 个 CSS 变量（bg/panel/border/accent/text/muted），本次 brief 扩展为完整体系"
+    },
+    "sources": [
+      "AGENTS.md §2 技术栈",
+      "AGENTS.md §10 设计决策",
+      "src/styles/globals.css 现有变量",
+      "src/types.ts 数据模型"
+    ]
+  },
+  "purpose": "将 Lumen 从功能闭环但视觉朴素的深色 MVP，升级为有统一设计语言、毛玻璃质感、渐变 accent 的精致消费级桌面应用。建立完整 design token 体系（color/typography/spacing/radius/elevation/motion），统一三个视图（聊天/记忆/设置）与主侧边栏的视觉风格，为后续 Phase 3-5（悬浮球/托盘/RSS）沉淀可复用基础。",
+  "audience": {
+    "primary": "个人知识工作者、重度 AI 对话用户",
+    "secondary": "重视数据本地化与隐私的技术敏感用户",
+    "personas": [
+      "每天与 AI 深度对话、需要 AI 记住自己偏好的研究者",
+      "用 AI 辅助写作/编程、希望沉淀长期上下文的创作者",
+      "对数据上云有顾虑、坚持本地优先的极客用户"
+    ],
+    "context": "Windows 桌面常驻应用，单用户本地使用，无社交/协作场景。使用频次高、单次会话长，对视觉舒适度和信息密度都有要求。"
+  },
+  "tone": "专业、克制、可信、有科技温度。深色基调传达专注与沉浸，毛玻璃与渐变带来精致感而非浮夸。不卖萌、不喧宾夺主，让内容（对话/记忆）成为视觉主角。",
+  "brand_voice": {
+    "keywords": ["克制", "可信", "专注", "有温度的科技感", "本地优先"],
+    "dos": [
+      "用平实中文，技术专有名词保留英文（API Key、embedding、RAG 等）",
+      "强调本地存储与用户控制权",
+      "状态反馈用最小必要的视觉信号（loading 圆点、Check 图标）",
+      "引导文案聚焦用户行为而非产品功能"
+    ],
+    "donts": [
+      "使用感叹号、卖萌语气词（呢、啦、哦）",
+      "在 UI 上堆砌品牌口号或营销话术",
+      "用红色表达非错误状态",
+      "过度动画干扰阅读"
+    ]
+  },
+  "variables": {
+    "collections": {
+      "color": {
+        "semantic": {
+          "bg/default": "#0f1115",
+          "bg/elevated": "#161a21",
+          "bg/sunken": "#0c0e12",
+          "panel/default": "#161a21",
+          "panel/glass": "rgba(22, 26, 33, 0.72)",
+          "panel/hover": "#1a1f28",
+          "border/subtle": "#1f2530",
+          "border/default": "#232932",
+          "border/strong": "#2c333d",
+          "border/accent": "rgba(106, 160, 255, 0.5)",
+          "text/primary": "#e6e8ec",
+          "text/secondary": "#8b93a1",
+          "text/tertiary": "#5c6470",
+          "text/inverse": "#0f1115",
+          "accent/default": "#6aa0ff",
+          "accent/hover": "#82b1ff",
+          "accent/active": "#5a8fec",
+          "accent/gradient": "linear-gradient(135deg, #6aa0ff 0%, #8b7ff5 100%)",
+          "accent/gradient_subtle": "linear-gradient(135deg, rgba(106,160,255,0.15) 0%, rgba(139,127,245,0.15) 100%)",
+          "success/default": "#4ade80",
+          "success/subtle": "rgba(74, 222, 128, 0.12)",
+          "warning/default": "#fbbf24",
+          "warning/subtle": "rgba(251, 191, 36, 0.12)",
+          "danger/default": "#f87171",
+          "danger/hover": "#ef4444",
+          "danger/subtle": "rgba(248, 113, 113, 0.12)",
+          "info/default": "#60a5fa",
+          "info/subtle": "rgba(96, 165, 250, 0.12)",
+          "glass/overlay": "rgba(15, 17, 21, 0.6)",
+          "glass/border": "rgba(255, 255, 255, 0.08)",
+          "glass/highlight": "rgba(255, 255, 255, 0.04)"
+        },
+        "neutral": {
+          "50": "#f5f6f8",
+          "100": "#e6e8ec",
+          "200": "#c8ccd4",
+          "300": "#8b93a1",
+          "400": "#5c6470",
+          "500": "#3a424d",
+          "600": "#2c333d",
+          "700": "#232932",
+          "800": "#1a1f28",
+          "900": "#161a21",
+          "950": "#0f1115",
+          "975": "#0c0e12"
+        },
+        "accent_scale": {
+          "50": "#eef4ff",
+          "100": "#d9e7ff",
+          "200": "#bcd5ff",
+          "300": "#82b1ff",
+          "400": "#6aa0ff",
+          "500": "#5a8fec",
+          "600": "#4a7fd6",
+          "700": "#3a66b8",
+          "800": "#2e4f91",
+          "900": "#1f3661"
+        }
+      },
+      "typography": {
+        "font_family": {
+          "sans": "Inter, \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "mono": "\"JetBrains Mono\", \"Cascadia Code\", Consolas, monospace",
+          "note": "Inter 与 JetBrains Mono 通过 index.html 引入 Google Fonts；中文回落 PingFang SC / Microsoft YaHei"
+        },
+        "sizes": {
+          "xs": 12,
+          "sm": 13,
+          "md": 14,
+          "lg": 16,
+          "xl": 18,
+          "2xl": 22,
+          "3xl": 28
+        },
+        "weights": {
+          "regular": 400,
+          "medium": 500,
+          "semibold": 600,
+          "bold": 700
+        },
+        "line_height": {
+          "tight": 1.25,
+          "base": 1.5,
+          "relaxed": 1.6
+        },
+        "letter_spacing": {
+          "tight": "-0.01em",
+          "normal": "0",
+          "wide": "0.02em"
+        }
+      },
+      "spacing": {
+        "scale": {
+          "0": 0,
+          "0.5": 2,
+          "1": 4,
+          "2": 8,
+          "3": 12,
+          "4": 16,
+          "5": 20,
+          "6": 24,
+          "8": 32,
+          "10": 40,
+          "12": 48,
+          "16": 64
+        },
+        "note": "对应 Tailwind 原生间距，不另立尺度，保持工具类一致性"
+      },
+      "radius": {
+        "none": 0,
+        "sm": 6,
+        "md": 10,
+        "lg": 16,
+        "xl": 20,
+        "full": 9999,
+        "note": "收敛为 4 档实用圆角（sm/md/lg/xl），替换当前 rounded/rounded-md/rounded-lg/rounded-xl/rounded-2xl 五种混用"
+      },
+      "elevation": {
+        "e1_subtle": "0 1px 2px rgba(0, 0, 0, 0.24)",
+        "e2_floating": "0 4px 12px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.24)",
+        "e3_overlay": "0 12px 32px rgba(0, 0, 0, 0.48), 0 4px 8px rgba(0, 0, 0, 0.32)",
+        "e_accent_glow": "0 0 0 1px rgba(106, 160, 255, 0.24), 0 4px 16px rgba(106, 160, 255, 0.18)",
+        "note": "深色界面阴影用纯黑半透明，accent 发光用于激活态强调"
+      },
+      "motion": {
+        "duration": {
+          "instant": 80,
+          "fast": 140,
+          "base": 220,
+          "slow": 360,
+          "slowest": 480
+        },
+        "easing": {
+          "standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+          "decelerate": "cubic-bezier(0, 0, 0.2, 1)",
+          "accelerate": "cubic-bezier(0.4, 0, 1, 1)",
+          "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+        },
+        "patterns": {
+          "fade_in": "opacity 0 → 1, duration.fast, decelerate",
+          "scale_in": "transform scale(0.96) → 1 + opacity 0 → 1, duration.base, spring",
+          "slide_up": "transform translateY(4px) → 0, duration.base, decelerate",
+          "hover_lift": "transform translateY(-1px), duration.fast, standard",
+          "color_shift": "background-color/border-color, duration.instant, standard"
+        }
+      },
+      "blur": {
+        "sm": "blur(4px)",
+        "md": "blur(8px)",
+        "lg": "blur(16px)",
+        "glass": "blur(12px) saturate(140%)",
+        "note": "毛玻璃面板用 glass 档，需配合半透明背景色"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Button",
+      "library_ref": "Button",
+      "variants": {
+        "emphasis": ["primary", "secondary", "ghost", "danger"],
+        "size": ["sm", "md", "lg"],
+        "icon": ["none", "leading", "trailing", "icon_only"],
+        "state": ["default", "hover", "active", "focus", "disabled", "loading"]
+      },
+      "props": {
+        "cornerRadius_sm": "radius.sm",
+        "cornerRadius_md": "radius.md",
+        "cornerRadius_lg": "radius.md",
+        "paddingX_sm": "spacing.2",
+        "paddingY_sm": "spacing.1",
+        "paddingX_md": "spacing.3",
+        "paddingY_md": "spacing.2",
+        "paddingX_lg": "spacing.4",
+        "paddingY_lg": "spacing.2",
+        "fontSize_sm": "typography.sizes.xs",
+        "fontSize_md": "typography.sizes.md",
+        "fontSize_lg": "typography.sizes.lg",
+        "fontWeight": "typography.weights.medium",
+        "minHeight_sm": "spacing.8",
+        "minHeight_md": "spacing.10",
+        "minHeight_lg": "spacing.11"
+      },
+      "variant_styles": {
+        "primary": {
+          "background": "color.semantic.accent.gradient",
+          "color": "color.semantic.text.inverse",
+          "hover": "brightness(1.08)",
+          "shadow": "elevation.e_accent_glow",
+          "note": "主 CTA，渐变蓝紫，带 accent 发光"
+        },
+        "secondary": {
+          "background": "color.semantic.panel.default",
+          "border": "1px solid color.semantic.border.default",
+          "color": "color.semantic.text.primary",
+          "hover_background": "color.semantic.panel.hover",
+          "hover_border": "color.semantic.border.strong"
+        },
+        "ghost": {
+          "background": "transparent",
+          "color": "color.semantic.text.secondary",
+          "hover_background": "rgba(255,255,255,0.04)",
+          "hover_color": "color.semantic.text.primary"
+        },
+        "danger": {
+          "background": "color.semantic.danger.subtle",
+          "border": "1px solid rgba(248,113,113,0.3)",
+          "color": "color.semantic.danger.default",
+          "hover_background": "rgba(248,113,113,0.2)",
+          "hover_border": "color.semantic.danger.default"
+        }
+      },
+      "content_guidelines": {
+        "max_label": 16,
+        "case": "Sentence",
+        "min_width": "spacing.12"
+      },
+      "interactions": [
+        {
+          "event": "onClick",
+          "animate": {
+            "type": "scale(0.97)",
+            "duration": "motion.duration.instant",
+            "easing": "motion.easing.standard"
+          }
+        },
+        {
+          "event": "hover",
+          "animate": "motion.patterns.hover_lift"
+        }
+      ]
+    },
+    {
+      "name": "Card",
+      "library_ref": "Card",
+      "variants": {
+        "surface": ["flat", "elevated", "glass"],
+        "padding": ["compact", "default", "comfortable"],
+        "interactive": [false, true]
+      },
+      "props": {
+        "cornerRadius": "radius.lg",
+        "padding_compact": "spacing.3",
+        "padding_default": "spacing.4",
+        "padding_comfortable": "spacing.6",
+        "border": "1px solid color.semantic.border.default"
+      },
+      "variant_styles": {
+        "flat": {
+          "background": "color.semantic.panel.default",
+          "shadow": "none"
+        },
+        "elevated": {
+          "background": "color.semantic.panel.default",
+          "shadow": "elevation.e2_floating"
+        },
+        "glass": {
+          "background": "color.semantic.panel.glass",
+          "backdrop_filter": "blur.glass",
+          "border": "1px solid color.semantic.glass.border",
+          "note": "毛玻璃卡片，用于浮层、模态、悬浮控件"
+        }
+      }
+    },
+    {
+      "name": "Input",
+      "library_ref": "Input",
+      "variants": {
+        "size": ["sm", "md"],
+        "state": ["default", "focus", "disabled", "error"],
+        "icon": ["none", "leading"]
+      },
+      "props": {
+        "cornerRadius": "radius.md",
+        "paddingX": "spacing.3",
+        "paddingY_md": "spacing.2",
+        "fontSize": "typography.sizes.md",
+        "minHeight": "spacing.10",
+        "background": "color.semantic.bg.sunken",
+        "border_default": "1px solid color.semantic.border.default",
+        "border_focus": "1px solid color.semantic.accent.default + box-shadow elevation.e_accent_glow",
+        "color": "color.semantic.text.primary",
+        "placeholder": "color.semantic.text.tertiary"
+      },
+      "interactions": [
+        {
+          "event": "focus",
+          "animate": "border-color + box-shadow, duration.fast, standard"
+        }
+      ]
+    },
+    {
+      "name": "Textarea",
+      "library_ref": "Textarea",
+      "props": {
+        "cornerRadius": "radius.md",
+        "padding": "spacing.3",
+        "fontSize": "typography.sizes.md",
+        "lineHeight": "typography.line_height.relaxed",
+        "background": "color.semantic.bg.sunken",
+        "border_default": "1px solid color.semantic.border.default",
+        "border_focus": "1px solid color.semantic.accent.default + box-shadow elevation.e_accent_glow",
+        "minHeight": "spacing.16"
+      }
+    },
+    {
+      "name": "Select",
+      "library_ref": "Select",
+      "props": {
+        "cornerRadius": "radius.md",
+        "paddingX": "spacing.3",
+        "paddingY": "spacing.2",
+        "minHeight": "spacing.10",
+        "background": "color.semantic.bg.sunken",
+        "border_default": "1px solid color.semantic.border.default",
+        "border_focus": "1px solid color.semantic.accent.default",
+        "arrow": "custom ChevronDown (lucide-react), positioned right spacing.3, pointer-events none",
+        "note": "原生 select 外观不可控，用 appearance:none + 自定义箭头覆盖"
+      }
+    },
+    {
+      "name": "Badge",
+      "library_ref": "Badge",
+      "variants": {
+        "tone": ["neutral", "info", "success", "warning", "danger", "accent"],
+        "size": ["sm", "md"]
+      },
+      "props": {
+        "cornerRadius": "radius.full",
+        "paddingX_sm": "spacing.2",
+        "paddingY_sm": "spacing.0.5",
+        "fontSize_sm": "typography.sizes.xs",
+        "fontWeight": "typography.weights.medium"
+      },
+      "variant_styles": {
+        "neutral": { "background": "rgba(255,255,255,0.06)", "color": "color.semantic.text.secondary" },
+        "info": { "background": "color.semantic.info.subtle", "color": "color.semantic.info.default" },
+        "success": { "background": "color.semantic.success.subtle", "color": "color.semantic.success.default" },
+        "warning": { "background": "color.semantic.warning.subtle", "color": "color.semantic.warning.default" },
+        "danger": { "background": "color.semantic.danger.subtle", "color": "color.semantic.danger.default" },
+        "accent": { "background": "color.semantic.accent.gradient_subtle", "color": "color.semantic.accent.default" }
+      }
+    },
+    {
+      "name": "Modal",
+      "library_ref": "Modal",
+      "variants": {
+        "size": ["sm", "md", "lg"]
+      },
+      "props": {
+        "overlay": "color.semantic.glass.overlay + backdrop-filter blur.md",
+        "panel_background": "color.semantic.panel.glass",
+        "panel_backdrop_filter": "blur.glass",
+        "panel_border": "1px solid color.semantic.glass.border",
+        "panel_cornerRadius": "radius.lg",
+        "panel_shadow": "elevation.e3_overlay",
+        "panel_padding": "spacing.5",
+        "maxWidth_md": "28rem"
+      },
+      "interactions": [
+        {
+          "event": "mount",
+          "animate": "motion.patterns.scale_in",
+          "note": "遮罩 fade_in + 面板 scale_in 同时进行"
+        },
+        {
+          "event": "unmount",
+          "animate": "opacity 1 → 0, duration.fast, accelerate"
+        }
+      ]
+    },
+    {
+      "name": "Sidebar",
+      "library_ref": "Sidebar/Primary",
+      "props": {
+        "width": "spacing.16 (64px)",
+        "background": "color.semantic.panel.glass",
+        "backdrop_filter": "blur.glass",
+        "border_right": "1px solid color.semantic.border.subtle",
+        "paddingY": "spacing.3"
+      },
+      "sections": {
+        "brand": {
+          "note": "顶部品牌区，Logo（Sparkles 图标，accent 渐变填充）+ 应用名 Lumen（垂直排列或仅 Logo）",
+          "height": "spacing.12"
+        },
+        "nav": {
+          "item_size": "spacing.10 × spacing.10",
+          "item_cornerRadius": "radius.md",
+          "gap": "spacing.1"
+        },
+        "footer": {
+          "note": "底部可放设置入口或版本号"
+        }
+      }
+    },
+    {
+      "name": "NavItem",
+      "library_ref": "Sidebar/NavItem",
+      "variants": {
+        "state": ["default", "hover", "active", "focus"]
+      },
+      "props": {
+        "size": "spacing.10 × spacing.10",
+        "cornerRadius": "radius.md",
+        "icon_size": "spacing.5 (20px)",
+        "tooltip": "自定义 Tooltip 组件，hover 延迟 400ms 显示，背景 glass.overlay + blur.sm"
+      },
+      "variant_styles": {
+        "default": {
+          "color": "color.semantic.text.secondary",
+          "background": "transparent"
+        },
+        "hover": {
+          "color": "color.semantic.text.primary",
+          "background": "rgba(255,255,255,0.04)"
+        },
+        "active": {
+          "color": "color.semantic.text.inverse",
+          "background": "color.semantic.accent.gradient",
+          "shadow": "elevation.e_accent_glow",
+          "note": "激活态用渐变 + 发光，替代当前纯色块"
+        }
+      },
+      "interactions": [
+        {
+          "event": "hover",
+          "animate": "motion.patterns.color_shift"
+        }
+      ]
+    },
+    {
+      "name": "MessageBubble",
+      "library_ref": "Chat/MessageBubble",
+      "variants": {
+        "role": ["user", "assistant", "error"],
+        "state": ["default", "thinking"]
+      },
+      "props": {
+        "maxWidth": "78%",
+        "cornerRadius": "radius.lg",
+        "padding": "spacing.3 spacing.4",
+        "fontSize": "typography.sizes.md",
+        "lineHeight": "typography.line_height.relaxed"
+      },
+      "variant_styles": {
+        "user": {
+          "alignment": "flex-end",
+          "background": "color.semantic.accent.gradient",
+          "color": "color.semantic.text.inverse",
+          "cornerRadius": "radius.lg radius.lg radius.sm radius.lg",
+          "note": "右下角小圆角，模拟气泡尾巴方向"
+        },
+        "assistant": {
+          "alignment": "flex-start",
+          "background": "color.semantic.panel.glass",
+          "backdrop_filter": "blur.sm",
+          "border": "1px solid color.semantic.glass.border",
+          "color": "color.semantic.text.primary",
+          "cornerRadius": "radius.lg radius.lg radius.lg radius.sm",
+          "note": "左下角小圆角；毛玻璃面板质感"
+        },
+        "error": {
+          "alignment": "flex-start",
+          "background": "color.semantic.danger.subtle",
+          "border": "1px solid rgba(248,113,113,0.3)",
+          "color": "color.semantic.danger.default"
+        }
+      },
+      "sub_components": {
+        "avatar": {
+          "size": "spacing.8 (32px)",
+          "cornerRadius": "radius.full",
+          "background": "color.semantic.accent.gradient",
+          "icon": "Sparkles (lucide-react)",
+          "note": "仅助手消息显示头像，位于气泡左上方"
+        },
+        "timestamp": {
+          "fontSize": "typography.sizes.xs",
+          "color": "color.semantic.text.tertiary",
+          "format": "HH:mm",
+          "note": "基于 createdAt（unix 毫秒）格式化"
+        },
+        "copy_button": {
+          "variant": "Button/ghost/icon_only/sm",
+          "icon": "Copy / Check（复制后切换）",
+          "visibility": "opacity-0 group-hover:opacity-100",
+          "note": "仅助手消息显示，hover 出现"
+        }
+      },
+      "thinking_state": {
+        "indicator": "三个 animate-pulse 圆点，错峰动画",
+        "text": "思考中",
+        "color": "color.semantic.text.tertiary"
+      }
+    },
+    {
+      "name": "MemoryCard",
+      "library_ref": "Memory/Card",
+      "variants": {
+        "state": ["default", "hover", "archived"]
+      },
+      "props": {
+        "cornerRadius": "radius.lg",
+        "padding": "spacing.3 spacing.4",
+        "background_default": "color.semantic.panel.default",
+        "background_glass": "color.semantic.panel.glass + backdrop-filter blur.sm（hover 时切换）",
+        "border": "1px solid color.semantic.border.default",
+        "shadow_hover": "elevation.e2_floating"
+      },
+      "sections": {
+        "summary": {
+          "fontSize": "typography.sizes.xs",
+          "color": "color.semantic.text.tertiary",
+          "note": "顶部小字摘要，单行截断"
+        },
+        "content": {
+          "fontSize": "typography.sizes.sm",
+          "color": "color.semantic.text.primary",
+          "archived_style": "line-through + color.text.tertiary"
+        },
+        "meta_row": {
+          "note": "徽章 + 时间戳水平排列",
+          "gap": "spacing.2"
+        },
+        "actions": {
+          "note": "右侧操作按钮组，opacity-0 group-hover:opacity-100",
+          "gap": "spacing.1"
+        }
+      },
+      "badges": {
+        "source": "Badge/tone=info，值 chat/manual",
+        "importance": "Badge/tone=accent，值 1-10，可加星标",
+        "tags": "Badge/tone=neutral，#tag 格式，最多显示 3 个 + N",
+        "archived": "Badge/tone=warning，'已归档'"
+      },
+      "timestamp": {
+        "show": "createdAt 相对时间（如 '3 天前'），updatedAt 不同时再加 '· 已编辑'",
+        "fontSize": "typography.sizes.xs",
+        "color": "color.semantic.text.tertiary"
+      },
+      "interactions": [
+        {
+          "event": "hover",
+          "animate": "background → glass + shadow e2 + transform translateY(-1px), duration.fast, standard"
+        }
+      ]
+    },
+    {
+      "name": "EmptyState",
+      "library_ref": "EmptyState",
+      "props": {
+        "layout": "vertical center, gap spacing.3",
+        "icon_size": "spacing.12 (48px)",
+        "icon_color": "color.semantic.accent.gradient（渐变填充）",
+        "title_fontSize": "typography.sizes.xl",
+        "title_weight": "typography.weights.semibold",
+        "title_color": "color.semantic.text.primary",
+        "subtitle_fontSize": "typography.sizes.md",
+        "subtitle_color": "color.semantic.text.secondary",
+        "maxWidth": "spacing.80 (20rem)"
+      },
+      "sub_components": {
+        "cta": {
+          "note": "可选的主操作按钮（Button/primary/md），如 '前往设置'"
+        }
+      }
+    },
+    {
+      "name": "FilterBar",
+      "library_ref": "FilterBar",
+      "props": {
+        "layout": "flex flex-wrap items-center gap-2",
+        "paddingY": "spacing.3",
+        "border_bottom": "1px solid color.semantic.border.subtle",
+        "background": "color.semantic.bg.default"
+      },
+      "sub_components": {
+        "search_input": "Input/size=sm/icon=leading，图标 Search，placeholder '搜索记忆…'",
+        "selects": "Select/size=sm，来源/标签过滤",
+        "checkbox": "自定义复选框，'显示已归档'"
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "name": "Two-column App Shell",
+      "layout": "左侧 Sidebar(64px) + 右侧 main(flex-1)",
+      "note": "应用级布局，Sidebar 毛玻璃，main 区根据路由切换视图"
+    },
+    {
+      "name": "Chat Three-region",
+      "layout": "对话列表(192px) + 消息区(flex-1) + 输入区(fixed bottom)",
+      "note": "ChatView 内部布局，消息区滚动，输入区固定底部"
+    },
+    {
+      "name": "Memory List",
+      "layout": "header + filterbar + scrollable card list",
+      "note": "MemoriesView 单栏自上而下，卡片 space-y-2"
+    },
+    {
+      "name": "Settings Form Sections",
+      "layout": "max-w-2xl 居中，分组到 Card，每组带标题 + 图标",
+      "note": "SettingsView 改造，从裸堆字段升级为卡片分组"
+    },
+    {
+      "name": "Modal Dialog",
+      "layout": "fixed inset-0 flex center，overlay + panel(scale_in 动画)",
+      "note": "MemoryEditor 等弹窗统一模式"
+    }
+  ],
+  "channels": {
+    "desktop_main": {
+      "platform": "Tauri 2 Windows",
+      "window": "主窗口，约 1200×800 默认",
+      "rendering": "WebView2，支持 backdrop-filter",
+      "note": "当前唯一渠道，所有组件优先为此渠道设计"
+    },
+    "tray_future": {
+      "platform": "系统托盘菜单",
+      "note": "Phase 3 规划，复用 color token，无需独立组件"
+    },
+    "floating_ball_future": {
+      "platform": "悬浮球小窗口",
+      "note": "Phase 3 规划，复用 MessageBubble + Input 的精简版"
+    },
+    "notification_future": {
+      "platform": "Windows 通知",
+      "note": "Phase 4 规划，复用 semantic color（success/info/warning）"
+    }
+  },
+  "deliverables": [
+    {
+      "name": "globals.css Design Token 体系",
+      "key_elements": ["字体引入", "完整 CSS 变量", "Tailwind v4 @theme 注册", "毛玻璃/渐变 token", "统一圆角间距"],
+      "priority": "high"
+    },
+    {
+      "name": "主侧边栏重构",
+      "key_elements": ["品牌区", "NavItem 激活态渐变发光", "自定义 Tooltip", "统一 NavLink 写法"],
+      "priority": "high"
+    },
+    {
+      "name": "ChatView 升级",
+      "key_elements": ["消息气泡毛玻璃", "助手头像 + 时间戳 + 复制按钮", "对话侧边栏时间分组", "空状态插画化"],
+      "priority": "high"
+    },
+    {
+      "name": "MemoriesView 升级",
+      "key_elements": ["MemoryCard 时间戳 + 毛玻璃 hover", "语义色徽章", "FilterBar 统一", "Modal 动画"],
+      "priority": "high"
+    },
+    {
+      "name": "SettingsView 升级",
+      "key_elements": ["表单卡片分组", "API Key 风险提示", "聚焦高光"],
+      "priority": "high"
+    }
+  ],
+  "a11y": {
+    "contrast": "WCAG 2.2 AA",
+    "min_touch": 44,
+    "focus_visible": true,
+    "rtl": false,
+    "localization": ["zh-CN"],
+    "screen_reader": true,
+    "keyboard_navigation": true,
+    "note": "深色背景下 text.primary(#e6e8ec) on bg.default(#0f1115) 对比度约 14:1，远超 AA 4.5:1；text.secondary(#8b93a1) on bg.default 约 5.2:1，达标；accent.default(#6aa0ff) on bg.default 约 6.8:1，达标"
+  },
+  "naming": {
+    "components": "PascalCase",
+    "variants": "kebab-case",
+    "slash": "Component/Variant=Value",
+    "tokens": "dot.case (color.semantic.accent.default)",
+    "css_variables": "kebab-case (--lumen-accent, --color-accent-default)",
+    "tailwind_theme": "kebab-case (bg-panel, text-muted, rounded-lg)",
+    "files": "PascalCase for components (ChatView.tsx), kebab-case for docs"
+  },
+  "file_structure": {
+    "tokens": "src/styles/globals.css (:root 变量 + @theme 注册)",
+    "components": "src/components/{chat,memory,settings}/",
+    "shared_ui": "src/components/ui/ (Button/Modal/Tooltip 等通用组件，本次按需新建)",
+    "design_docs": "initiatives/lumen-ui-redesign/design/"
+  },
+  "metrics": {
+    "primary": "视觉一致性：硬编码色值数量降为 0（全走 token）",
+    "secondary": [
+      "圆角种类从 5 种收敛到 4 档",
+      "字体实际加载 Inter 而非回落 Segoe UI",
+      "三个视图视觉风格统一（同一套 token + 组件）",
+      "WCAG AA 对比度全量达标"
+    ],
+    "success_criteria": "globals.css 中 :root 变量覆盖所有色值；组件中无硬编码 hex；tsc + vite build 通过；实际运行视觉无割裂感"
+  },
+  "assets": {
+    "illustration_style": "无插画，用 lucide-react 图标 + 渐变填充替代",
+    "icon_set": "lucide-react",
+    "fonts": ["Inter (Google Fonts)", "JetBrains Mono (Google Fonts)"],
+    "image_formats": ["SVG"],
+    "max_file_size": "字体子集化后 < 200KB/族",
+    "note": "字体通过 Google Fonts CDN 引入；图标全用 lucide-react 现有图标，不引入新图标库"
+  }
+}

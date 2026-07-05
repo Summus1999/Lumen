@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Plus,
-  Trash2,
-  Pencil,
   Archive,
   ArchiveRestore,
-  Search,
-  X,
+  Brain,
+  Check,
+  ChevronDown,
+  Pencil,
+  Plus,
   Save,
+  Search,
+  Trash2,
+  X,
 } from "lucide-react";
 import {
   addMemory,
@@ -16,6 +19,8 @@ import {
   toggleArchive,
   updateMemory,
 } from "../../lib/ipc";
+import { formatRelative } from "../../lib/time";
+import Badge from "../ui/Badge";
 import type { Memory, MemorySource } from "../../types";
 
 const SOURCES: (MemorySource | "all")[] = ["all", "chat", "manual"];
@@ -101,68 +106,59 @@ export default function MemoriesView() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="border-b border-[var(--lumen-border)] px-6 py-4">
+      <header className="border-b border-border-subtle px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold">记忆管理</h1>
-            <p className="text-xs text-[var(--lumen-muted)]">
+            <h1 className="text-lg font-semibold text-text">记忆管理</h1>
+            <p className="text-xs text-muted">
               共 {memories.length} 条 · 显示 {filtered.length} 条
             </p>
           </div>
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-2 rounded-lg bg-[var(--lumen-accent)] px-3 py-2 text-sm font-medium text-white hover:opacity-90"
+            className="flex items-center gap-2 rounded-md bg-accent-gradient px-3 py-2 text-sm font-medium text-text-inverse shadow-accent-glow transition-transform duration-fast ease-standard hover:-translate-y-px"
           >
             <Plus size={14} /> 手动添加
           </button>
         </div>
       </header>
 
-      {/* 过滤器 */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--lumen-border)] px-6 py-3">
+      {/* 过滤器栏：搜索框 + 来源/标签下拉 + 显示已归档复选框 */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border-subtle px-6 py-3">
         <div className="relative">
           <Search
             size={14}
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--lumen-muted)]"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary"
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="搜索内容 / 摘要 / 标签"
-            className="w-64 rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-bg)] py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[var(--lumen-accent)]"
+            className="focus-accent w-64 rounded-md border border-border bg-bg-sunken py-1.5 pl-8 pr-3 text-xs text-text outline-none transition-all duration-fast ease-standard"
           />
         </div>
-        <select
+        <SelectInput
           value={sourceFilter}
-          onChange={(e) =>
-            setSourceFilter(e.target.value as MemorySource | "all")
-          }
-          className="rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-bg)] px-2 py-1.5 text-xs outline-none"
-        >
-          {SOURCES.map((s) => (
-            <option key={s} value={s}>
-              {s === "all" ? "全部来源" : s === "chat" ? "对话产生" : "手动添加"}
-            </option>
-          ))}
-        </select>
-        <select
+          onChange={(v) => setSourceFilter(v as MemorySource | "all")}
+          options={SOURCES.map((s) => ({
+            value: s,
+            label: s === "all" ? "全部来源" : s === "chat" ? "对话产生" : "手动添加",
+          }))}
+        />
+        <SelectInput
           value={tagFilter ?? ""}
-          onChange={(e) => setTagFilter(e.target.value || null)}
-          className="rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-bg)] px-2 py-1.5 text-xs outline-none"
-        >
-          <option value="">全部标签</option>
-          {allTags.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        <label className="flex items-center gap-1.5 text-xs text-[var(--lumen-muted)]">
+          onChange={(v) => setTagFilter(v || null)}
+          options={[
+            { value: "", label: "全部标签" },
+            ...allTags.map((t) => ({ value: t, label: t })),
+          ]}
+        />
+        <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted">
           <input
             type="checkbox"
             checked={showArchived}
             onChange={(e) => setShowArchived(e.target.checked)}
-            className="accent-[var(--lumen-accent)]"
+            className="accent-accent"
           />
           显示已归档
         </label>
@@ -171,16 +167,21 @@ export default function MemoriesView() {
       {/* 列表 */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {error && (
-          <div className="mb-3 rounded-lg border border-red-800 bg-red-950/40 px-3 py-2 text-xs text-red-300">
+          <div className="mb-3 rounded-md border border-danger/30 bg-danger-subtle px-3 py-2 text-xs text-danger">
             {error}
           </div>
         )}
         {loading ? (
-          <p className="text-sm text-[var(--lumen-muted)]">加载中…</p>
+          <p className="text-sm text-muted">加载中…</p>
         ) : filtered.length === 0 ? (
-          <p className="py-12 text-center text-sm text-[var(--lumen-muted)]">
-            没有匹配的记忆。
-          </p>
+          <div className="flex flex-col items-center justify-center gap-3 py-16">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-gradient-subtle">
+              <Brain size={28} className="text-accent" />
+            </div>
+            <p className="text-sm text-muted">
+              {memories.length === 0 ? "还没有记忆，聊几句让 Lumen 记住你。" : "没有匹配的记忆。"}
+            </p>
+          </div>
         ) : (
           <div className="space-y-2">
             {filtered.map((m) => (
@@ -214,6 +215,40 @@ export default function MemoriesView() {
   );
 }
 
+/**
+ * 带 ChevronDown 图标的样式化 select。
+ * 原生 select 的箭头在深色主题下不可控，用 appearance:none + 自定义图标覆盖。
+ */
+function SelectInput({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="focus-accent appearance-none rounded-md border border-border bg-bg-sunken py-1.5 pl-3 pr-8 text-xs text-text outline-none transition-all duration-fast ease-standard"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        size={14}
+        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-tertiary"
+      />
+    </div>
+  );
+}
+
 function MemoryCard({
   memory,
   onEdit,
@@ -226,49 +261,44 @@ function MemoryCard({
   onArchive: () => void;
 }) {
   return (
-    <div className="group rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-panel)] px-4 py-3">
+    <div className="group rounded-lg border border-border bg-panel px-4 py-3 transition-all duration-fast ease-standard hover:-translate-y-px hover:border-border-strong hover:bg-panel-glass hover:shadow-e2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           {memory.summary && (
-            <p className="mb-0.5 text-xs font-medium text-[var(--lumen-muted)]">
+            <p className="mb-0.5 text-xs font-medium text-text-tertiary">
               {memory.summary}
             </p>
           )}
           <p
             className={
               "text-sm " +
-              (memory.archived ? "text-[var(--lumen-muted)] line-through" : "")
+              (memory.archived ? "text-text-tertiary line-through" : "text-text")
             }
           >
             {memory.content}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-[#1f2530] px-1.5 py-0.5 text-[10px] text-[var(--lumen-muted)]">
-              {memory.source === "chat" ? "对话" : "手动"}
-            </span>
-            <span className="rounded bg-[#1f2530] px-1.5 py-0.5 text-[10px] text-[var(--lumen-muted)]">
-              重要度 {memory.importance}
-            </span>
+            <Badge tone="info">{memory.source === "chat" ? "对话" : "手动"}</Badge>
+            <Badge tone="accent">重要度 {memory.importance}</Badge>
             {memory.tags.map((t) => (
-              <span
-                key={t}
-                className="rounded bg-[var(--lumen-accent)]/15 px-1.5 py-0.5 text-[10px] text-[var(--lumen-accent)]"
-              >
+              <Badge key={t} tone="neutral">
                 #{t}
-              </span>
+              </Badge>
             ))}
-            {memory.archived && (
-              <span className="rounded bg-yellow-900/40 px-1.5 py-0.5 text-[10px] text-yellow-300">
-                已归档
-              </span>
-            )}
+            {memory.archived && <Badge tone="warning">已归档</Badge>}
+            {/* 时间戳：相对时间 + 编辑标记 */}
+            <span className="ml-auto text-[10px] text-text-tertiary">
+              {formatRelative(memory.createdAt)}
+              {memory.updatedAt !== memory.createdAt && " · 已编辑"}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        {/* 操作按钮组：hover 显示 */}
+        <div className="flex items-center gap-0.5 opacity-0 transition-opacity duration-fast ease-standard group-hover:opacity-100">
           <button
             onClick={onArchive}
             title={memory.archived ? "取消归档" : "归档"}
-            className="rounded p-1 text-[var(--lumen-muted)] hover:bg-[#1f2530] hover:text-[var(--lumen-text)]"
+            className="rounded p-1 text-muted transition-colors duration-fast ease-standard hover:bg-glass-highlight hover:text-text"
           >
             {memory.archived ? (
               <ArchiveRestore size={14} />
@@ -279,14 +309,14 @@ function MemoryCard({
           <button
             onClick={onEdit}
             title="编辑"
-            className="rounded p-1 text-[var(--lumen-muted)] hover:bg-[#1f2530] hover:text-[var(--lumen-text)]"
+            className="rounded p-1 text-muted transition-colors duration-fast ease-standard hover:bg-glass-highlight hover:text-text"
           >
             <Pencil size={14} />
           </button>
           <button
             onClick={onDelete}
             title="删除"
-            className="rounded p-1 text-[var(--lumen-muted)] hover:bg-red-950/50 hover:text-red-300"
+            className="rounded p-1 text-muted transition-colors duration-fast ease-standard hover:bg-danger-subtle hover:text-danger"
           >
             <Trash2 size={14} />
           </button>
@@ -345,15 +375,23 @@ function MemoryEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-lg rounded-xl border border-[var(--lumen-border)] bg-[var(--lumen-panel)] p-5">
+    // 遮罩：毛玻璃化；面板：scale_in 进场动画
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-glass-overlay animate-fade-in"
+      style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+      onClick={onClose}
+    >
+      <div
+        className="glass-panel w-full max-w-lg rounded-lg p-5 shadow-e3 animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold">
+          <h2 className="text-base font-semibold text-text">
             {memory ? "编辑记忆" : "添加记忆"}
           </h2>
           <button
             onClick={onClose}
-            className="rounded p-1 text-[var(--lumen-muted)] hover:text-[var(--lumen-text)]"
+            className="rounded p-1 text-muted transition-colors duration-fast ease-standard hover:text-text"
           >
             <X size={16} />
           </button>
@@ -361,39 +399,35 @@ function MemoryEditor({
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs text-[var(--lumen-muted)]">
-              摘要 (可选)
-            </label>
+            <label className="mb-1 block text-xs text-muted">摘要 (可选)</label>
             <input
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              className="w-full rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--lumen-accent)]"
+              className="focus-accent w-full rounded-md border border-border bg-bg-sunken px-3 py-2 text-sm text-text outline-none transition-all duration-fast ease-standard"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-[var(--lumen-muted)]">
-              内容
-            </label>
+            <label className="mb-1 block text-xs text-muted">内容</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={4}
-              className="w-full resize-none rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--lumen-accent)]"
+              className="focus-accent w-full resize-none rounded-md border border-border bg-bg-sunken px-3 py-2 text-sm text-text outline-none transition-all duration-fast ease-standard"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-[var(--lumen-muted)]">
+            <label className="mb-1 block text-xs text-muted">
               标签 (逗号分隔)
             </label>
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               placeholder="AI, 手机, 学习"
-              className="w-full rounded-lg border border-[var(--lumen-border)] bg-[var(--lumen-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--lumen-accent)]"
+              className="focus-accent w-full rounded-md border border-border bg-bg-sunken px-3 py-2 text-sm text-text outline-none transition-all duration-fast ease-standard"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-[var(--lumen-muted)]">
+            <label className="mb-1 block text-xs text-muted">
               重要度: {importance}
             </label>
             <input
@@ -402,12 +436,12 @@ function MemoryEditor({
               max={10}
               value={importance}
               onChange={(e) => setImportance(Number(e.target.value))}
-              className="w-full accent-[var(--lumen-accent)]"
+              className="w-full accent-accent"
             />
           </div>
 
           {error && (
-            <div className="rounded-lg border border-red-800 bg-red-950/40 px-3 py-2 text-xs text-red-300">
+            <div className="rounded-md border border-danger/30 bg-danger-subtle px-3 py-2 text-xs text-danger">
               {error}
             </div>
           )}
@@ -416,16 +450,17 @@ function MemoryEditor({
         <div className="mt-5 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded-lg border border-[var(--lumen-border)] px-4 py-2 text-sm text-[var(--lumen-muted)] hover:text-[var(--lumen-text)]"
+            className="rounded-md border border-border px-4 py-2 text-sm text-muted transition-colors duration-fast ease-standard hover:border-border-strong hover:text-text"
           >
             取消
           </button>
           <button
             onClick={onSave}
             disabled={saving || !content.trim()}
-            className="flex items-center gap-2 rounded-lg bg-[var(--lumen-accent)] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="flex items-center gap-2 rounded-md bg-accent-gradient px-4 py-2 text-sm font-medium text-text-inverse shadow-accent-glow transition-opacity duration-fast ease-standard hover:opacity-90 disabled:opacity-50"
           >
-            <Save size={14} /> {saving ? "保存中…" : "保存"}
+            {saving ? <Check size={14} /> : <Save size={14} />}{" "}
+            {saving ? "保存中…" : "保存"}
           </button>
         </div>
       </div>
