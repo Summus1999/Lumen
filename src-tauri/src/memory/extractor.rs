@@ -6,7 +6,7 @@ use crate::llm::{ChatMessage, ChatRequest, GlmClient};
 use crate::memory::store::{self, MemoryInput, MemorySource};
 use crate::memory::rag;
 
-/// One fact extracted by the LLM from a conversation.
+/// LLM 从对话中抽取出的一个事实。
 #[derive(Debug, Clone, Deserialize)]
 struct ExtractedFact {
     content: String,
@@ -24,10 +24,9 @@ struct ExtractionResult {
     facts: Vec<ExtractedFact>,
 }
 
-/// Run the extractor over the most recent messages of a conversation and
-/// persist any new facts as `source = chat` memories (with embeddings).
+/// 对对话的最新消息运行抽取器，并将新事实持久化为 source = chat 的记忆（含嵌入）。
 ///
-/// `recent_turns` is a flat list of (role, content) pairs, newest last.
+/// `recent_turns` 是 (role, content) 的扁平列表，最新的在最后。
 pub async fn extract_and_store(
     pool: &DbPool,
     client: &GlmClient,
@@ -88,7 +87,7 @@ pub async fn extract_and_store(
         };
         match store::add_memory(pool, &input) {
             Ok(memory) => {
-                // Embed in background; if it fails we log but keep the memory row.
+                // 后台生成嵌入；失败则记录日志但保留记忆行。
                 if let Err(e) =
                     rag::embed_and_store(pool, client, embedding_model, memory.id, &content).await
                 {
@@ -102,8 +101,7 @@ pub async fn extract_and_store(
     Ok(ids)
 }
 
-/// The model sometimes wraps JSON in prose or code fences. Pull out the first
-/// balanced {...} block we can find.
+/// 模型有时会把 JSON 包裹在正文或代码块中。找出第一个能匹配的 {...} 块。
 fn extract_json(s: &str) -> Option<&str> {
     let start = s.find('{')?;
     let mut depth = 0i32;

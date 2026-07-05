@@ -9,14 +9,14 @@ import type {
   MemoryInput,
 } from "../types";
 
-// ---- Settings ----
+// ---- 设置 ----
 export const getSettings = (): Promise<AppSettings> =>
   invoke<AppSettings>("get_settings");
 
 export const saveSettings = (settings: AppSettings): Promise<AppSettings> =>
   invoke<AppSettings>("save_settings", { settings });
 
-// ---- Conversations & messages ----
+// ---- 对话与消息 ----
 export const listConversations = (): Promise<Conversation[]> =>
   invoke<Conversation[]>("list_conversations");
 
@@ -31,11 +31,11 @@ export const deleteConversation = (id: number): Promise<void> =>
 export const listMessages = (conversationId: number): Promise<ChatMessage[]> =>
   invoke<ChatMessage[]>("list_messages", { conversationId });
 
-// ---- Chat (RAG + auto-extract) ----
+// ---- 聊天（RAG + 自动抽取）----
 export const chat = (turn: ChatTurn): Promise<ChatResult> =>
   invoke<ChatResult>("chat", { turn });
 
-// ---- Memory CRUD ----
+// ---- 记忆 CRUD ----
 export const listMemories = (): Promise<Memory[]> =>
   invoke<Memory[]>("list_memories");
 

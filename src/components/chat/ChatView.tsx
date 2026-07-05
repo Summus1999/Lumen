@@ -29,14 +29,14 @@ export default function ChatView() {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load conversation list on mount.
+  // 挂载时加载对话列表。
   useEffect(() => {
     listConversations()
       .then((cs) => setConversations(cs))
       .catch(() => {});
   }, []);
 
-  // Autoscroll on new turns.
+  // 新消息时自动滚动。
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
@@ -64,7 +64,7 @@ export default function ChatView() {
 
     setSending(true);
     setInput("");
-    // Optimistic user turn.
+    // 乐观地先展示用户消息。
     setTurns((prev) => [
       ...prev,
       { role: "user", content: text },
@@ -77,7 +77,7 @@ export default function ChatView() {
         userMessage: text,
       });
 
-      // If a brand-new conversation was created, refresh the list.
+      // 如果创建了全新对话，刷新列表。
       if (!currentId) {
         setCurrentId(result.conversationId);
         listConversations().then(setConversations).catch(() => {});
@@ -85,7 +85,7 @@ export default function ChatView() {
 
       setTurns((prev) => {
         const next = [...prev];
-        // Replace the pending assistant turn with the real reply.
+        // 用真实回复替换待定的助手消息。
         for (let i = next.length - 1; i >= 0; i--) {
           if (next[i].pending) {
             next[i] = { role: "assistant", content: result.assistantContent };
@@ -124,7 +124,7 @@ export default function ChatView() {
   const startNewChat = async () => {
     setTurns([]);
     setCurrentId(null);
-    // Lazily create the conversation row on first message instead.
+    // 改为在第一条消息时再懒创建对话记录。
   };
 
   if (settingsLoading) {
@@ -157,7 +157,7 @@ export default function ChatView() {
 
   return (
     <div className="flex h-full">
-      {/* Conversation sidebar */}
+      {/* 对话侧边栏 */}
       <aside className="flex w-48 flex-col border-r border-[var(--lumen-border)] bg-[var(--lumen-panel)]">
         <button
           onClick={startNewChat}
@@ -189,7 +189,7 @@ export default function ChatView() {
         </div>
       </aside>
 
-      {/* Chat column */}
+      {/* 聊天区 */}
       <section className="flex flex-1 flex-col overflow-hidden">
         <div
           ref={scrollRef}
@@ -206,7 +206,7 @@ export default function ChatView() {
           ))}
         </div>
 
-        {/* Composer */}
+        {/* 输入框 */}
         <div className="border-t border-[var(--lumen-border)] px-6 py-3">
           <div className="flex items-end gap-2 rounded-xl border border-[var(--lumen-border)] bg-[var(--lumen-panel)] px-3 py-2 focus-within:border-[var(--lumen-accent)]">
             <textarea

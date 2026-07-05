@@ -22,7 +22,7 @@ export default function App() {
         }
       })
       .catch(() => {
-        // Settings don't exist yet — that's fine, user will fill them in.
+        // 设置还不存在——没关系，用户会自行填写。
         if (alive) setSettingsLoading(false);
       });
     return () => {
@@ -32,7 +32,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
-      {/* Sidebar */}
+      {/* 侧边栏 */}
       <nav className="flex w-14 flex-col items-center gap-1 border-r border-[var(--lumen-border)] bg-[var(--lumen-panel)] py-3">
         <NavLink
           to="/"
@@ -73,7 +73,7 @@ export default function App() {
         </NavLink>
       </nav>
 
-      {/* Main content */}
+      {/* 主内容区 */}
       <main className="flex flex-1 flex-col overflow-hidden">
         <Routes>
           <Route path="/" element={<ChatView />} />

@@ -5,13 +5,13 @@ use super::types::{
     ChatRequest, ChatResponse, EmbeddingRequest, EmbeddingResponse,
 };
 
-/// Thin HTTP client for the GLM (智谱 BigModel) OpenAI-compatible API.
+/// GLM（智谱 BigModel）OpenAI 兼容 API 的轻量 HTTP 客户端。
 ///
-/// Endpoints (relative to `base_url`, default `https://open.bigmodel.cn/api/paas/v4`):
+/// 端点（相对于 `base_url`，默认 `https://open.bigmodel.cn/api/paas/v4`）：
 ///   - POST /chat/completions
 ///   - POST /embeddings
 ///
-/// Auth: `Authorization: Bearer {api_key}`.
+/// 认证：`Authorization: Bearer {api_key}`。
 pub struct GlmClient {
     http: Client,
     base_url: String,
@@ -34,7 +34,7 @@ impl GlmClient {
         format!("{}/{}", self.base_url, path.trim_start_matches('/'))
     }
 
-    /// Run a chat completion and return the first choice's content.
+    /// 运行聊天补全并返回第一个选项的内容。
     pub async fn chat(&self, req: &ChatRequest) -> Result<String> {
         let resp = self
             .http
@@ -62,7 +62,7 @@ impl GlmClient {
             .ok_or_else(|| anyhow!("GLM chat returned no choices"))
     }
 
-    /// Embed a single text and return its vector.
+    /// 对单条文本生成嵌入并返回其向量。
     pub async fn embed(&self, model: &str, input: &str) -> Result<Vec<f32>> {
         let req = EmbeddingRequest {
             model: model.to_string(),

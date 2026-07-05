@@ -1,4 +1,4 @@
 /// <reference types="vite/client" />
 
-// Allow side-effect CSS imports (Tailwind, globals.css).
+// 允许副作用式 CSS 导入（Tailwind、globals.css）。
 declare module "*.css";

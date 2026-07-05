@@ -93,7 +93,7 @@ export default function SettingsView() {
           />
         </section>
 
-        {/* Chat model */}
+        {/* 对话模型 */}
         <section className="space-y-2">
           <label className="text-sm font-medium">对话模型</label>
           <select

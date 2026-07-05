@@ -1,5 +1,5 @@
-// Shared types mirroring the Rust structs in src-tauri/src.
-// Keep these in sync with commands.rs / db / memory modules.
+// 与 src-tauri/src 中 Rust 结构体对应的共享类型。
+// 请保持与 commands.rs / db / memory 模块同步。
 
 export type MemorySource = "chat" | "manual";
 
@@ -10,12 +10,12 @@ export interface Memory {
   source: MemorySource;
   importance: number; // 1..=10
   tags: string[];
-  createdAt: number; // unix ms
-  updatedAt: number; // unix ms
+  createdAt: number; // Unix 毫秒
+  updatedAt: number; // Unix 毫秒
   archived: boolean;
 }
 
-/** Payload for creating or updating a memory from the frontend. */
+/** 前端用于创建或更新记忆的载荷。 */
 export interface MemoryInput {
   content: string;
   summary?: string | null;
@@ -42,28 +42,28 @@ export interface Conversation {
   updatedAt: number;
 }
 
-/** A chat turn sent to the backend `chat` command. */
+/** 发送给后端 chat 命令的一次对话轮次。 */
 export interface ChatTurn {
   conversationId: number | null;
   userMessage: string;
 }
 
-/** Result of a chat turn: the assistant reply plus bookkeeping. */
+/** 一次对话轮次的结果：助手回复及附带信息。 */
 export interface ChatResult {
   conversationId: number;
   userMessageId: number;
   assistantMessageId: number;
   assistantContent: string;
-  /** Memories injected into the system prompt for this turn. */
+  /** 注入到本轮系统提示中的记忆。 */
   retrievedMemoryIds: number[];
-  /** Memories freshly extracted from this turn (may be empty). */
+  /** 从本轮对话中新提取的记忆（可能为空）。 */
   extractedMemoryIds: number[];
 }
 
-/** A single memory returned by RAG retrieval, with its similarity score. */
+/** RAG 检索返回的单条记忆及其相似度分数。 */
 export interface RetrievedMemory {
   memory: Memory;
-  score: number; // cosine similarity, 0..1
+  score: number; // 余弦相似度，0..1
 }
 
 export interface AppSettings {
@@ -73,7 +73,7 @@ export interface AppSettings {
   baseUrl: string;
 }
 
-/** Facts the LLM extractor pulled out of a conversation. */
+/** LLM 抽取器从对话中提取出的事实。 */
 export interface ExtractedFact {
   content: string;
   importance: number; // 1..=10

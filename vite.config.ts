@@ -2,8 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-// Tauri spawns the dev server and talks to it; these host/port settings
-// keep Vite in sync with what Tauri expects.
+// Tauri 会启动开发服务器并与其通信；这些 host/port 设置
+// 让 Vite 与 Tauri 的期望保持一致。
 const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig({
@@ -17,7 +17,7 @@ export default defineConfig({
       ? { protocol: "ws", host, port: 1421 }
       : undefined,
     watch: {
-      // Don't trigger rebuilds when the Rust side changes.
+      // Rust 侧变更时不触发重建。
       ignored: ["**/src-tauri/**"],
     },
   },

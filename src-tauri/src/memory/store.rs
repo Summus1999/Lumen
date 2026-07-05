@@ -35,13 +35,12 @@ pub struct Memory {
     pub source: MemorySource,
     pub importance: i32, // 1..=10
     pub tags: Vec<String>,
-    pub created_at: i64, // unix ms
+    pub created_at: i64, // Unix 毫秒
     pub updated_at: i64,
     pub archived: bool,
 }
 
-/// Input for creating or updating a memory. All optional fields fall back
-/// to defaults / existing values on update.
+/// 创建或更新记忆的输入。所有可选字段在更新时都会回退到默认值或现有值。
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct MemoryInput {
@@ -104,8 +103,7 @@ pub fn get_memory(pool: &DbPool, id: i64) -> Result<Option<Memory>> {
     }
 }
 
-/// Insert a memory and return it (without an embedding — caller calls
-/// `rag::embed_and_store` afterwards).
+/// 插入一条记忆并返回它（不含嵌入——调用方需随后调用 rag::embed_and_store）。
 pub fn add_memory(pool: &DbPool, input: &MemoryInput) -> Result<Memory> {
     let conn = pool.get()?;
     let now = now_ms();
@@ -143,7 +141,7 @@ pub fn add_memory(pool: &DbPool, input: &MemoryInput) -> Result<Memory> {
     })
 }
 
-/// Update selected fields of an existing memory. Only provided fields change.
+/// 更新已有记忆的指定字段。仅提供的字段会被修改。
 pub fn update_memory(pool: &DbPool, id: i64, input: &MemoryInput) -> Result<Memory> {
     let existing = get_memory(pool, id)?
         .ok_or_else(|| anyhow::anyhow!("memory {} not found", id))?;
@@ -191,14 +189,14 @@ pub fn set_archived(pool: &DbPool, id: i64, archived: bool) -> Result<Memory> {
 
 pub fn delete_memory(pool: &DbPool, id: i64) -> Result<()> {
     let conn = pool.get()?;
-    // embeddings row cascades via FK ON DELETE CASCADE.
+    // embeddings 行会通过外键 ON DELETE CASCADE 级联删除。
     conn.execute("DELETE FROM memories WHERE id = ?1", params![id])?;
     Ok(())
 }
 
-// ---- Embedding storage helpers (used by rag.rs and extractor) ----
+// ---- 嵌入存储辅助函数（rag.rs 与 extractor 使用）----
 
-/// Store the embedding for a memory, replacing any existing one.
+/// 存储一条记忆的嵌入向量，覆盖已有数据。
 pub fn store_embedding(
     pool: &DbPool,
     memory_id: i64,
@@ -225,8 +223,8 @@ pub fn store_embedding(
     Ok(())
 }
 
-/// Load every (memory_id, embedding, importance) triple for brute-force cosine
-/// search. Skips archived memories. (importance is folded into the score.)
+/// 加载所有 (memory_id, embedding, importance) 三元组，用于暴力余弦搜索。
+/// 跳过已归档记忆。（重要度会折入分数。）
 pub fn load_all_embeddings(pool: &DbPool) -> Result<Vec<(i64, Vec<f32>, i32)>> {
     let conn = pool.get()?;
     let mut stmt = conn.prepare(

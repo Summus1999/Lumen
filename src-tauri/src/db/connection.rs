@@ -5,8 +5,8 @@ use rusqlite::Connection;
 
 pub type DbPool = Pool<SqliteConnectionManager>;
 
-/// A connection manager wrapper that applies the schema + pragmas on every
-/// checkout, so any new connection (pool grows, etc.) is always ready.
+/// 连接管理器包装，在每次取出连接时都会应用 schema + pragmas，
+/// 因此任何新连接（连接池扩容等）都始终可用。
 #[derive(Debug)]
 struct InitConnection;
 
@@ -19,8 +19,7 @@ impl r2d2::CustomizeConnection<Connection, rusqlite::Error> for InitConnection {
     }
 }
 
-/// Create a pooled connection to the SQLite database at `path`. Creates the
-/// file and applies the schema if it doesn't exist.
+/// 创建到指定路径 SQLite 数据库的连接池。如果文件不存在则创建并应用 schema。
 pub fn init_db(path: &Path) -> anyhow::Result<DbPool> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;

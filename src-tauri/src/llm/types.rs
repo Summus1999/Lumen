@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
-    pub role: String, // "system" | "user" | "assistant"
+    pub role: String, // 角色："system" | "user" | "assistant"
     pub content: String,
 }
 

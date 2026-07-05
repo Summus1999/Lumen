@@ -25,13 +25,13 @@ export default function MemoriesView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
+  // 过滤器
   const [query, setQuery] = useState("");
   const [sourceFilter, setSourceFilter] = useState<MemorySource | "all">("all");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
 
-  // Editor / add modal
+  // 编辑器 / 添加弹窗
   const [editing, setEditing] = useState<Memory | null>(null);
   const [adding, setAdding] = useState(false);
 
@@ -72,7 +72,7 @@ export default function MemoriesView() {
           : true
       )
       .sort((a, b) => {
-        // Active first by importance desc, then recency.
+        // 未归档的优先按重要度降序，再按时间降序。
         if (b.importance !== a.importance) {
           return b.importance - a.importance;
         }
@@ -118,7 +118,7 @@ export default function MemoriesView() {
         </div>
       </header>
 
-      {/* Filters */}
+      {/* 过滤器 */}
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--lumen-border)] px-6 py-3">
         <div className="relative">
           <Search
@@ -168,7 +168,7 @@ export default function MemoriesView() {
         </label>
       </div>
 
-      {/* List */}
+      {/* 列表 */}
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {error && (
           <div className="mb-3 rounded-lg border border-red-800 bg-red-950/40 px-3 py-2 text-xs text-red-300">

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ---- Lumen base styles ---- */
+/* ---- Lumen 基础样式 ---- */
 :root {
   color-scheme: dark;
   --lumen-bg: #0f1115;
@@ -33,7 +33,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Thin scrollbars to match the dense dashboard feel. */
+/* 细滚动条，匹配紧凑的仪表盘风格。 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -49,7 +49,7 @@ body {
   background: #3a424d;
 }
 
-/* Markdown rendering inside assistant messages. */
+/* 助手消息内部的 Markdown 渲染。 */
 .prose-lumen {
   line-height: 1.6;
   word-wrap: break-word;

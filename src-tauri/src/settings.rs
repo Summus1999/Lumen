@@ -24,8 +24,8 @@ impl Default for AppSettings {
     }
 }
 
-/// All settings are persisted as a single JSON blob under the key "app".
-/// Simple and easy to extend with new fields later.
+/// 所有设置以单个 JSON 对象的形式持久化，键名为 "app"。
+/// 简单且便于后续扩展新字段。
 const SETTINGS_KEY: &str = "app";
 
 pub fn get_settings(pool: &DbPool) -> Result<AppSettings> {

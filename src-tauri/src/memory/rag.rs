@@ -4,16 +4,15 @@ use crate::db::DbPool;
 use crate::llm::GlmClient;
 use crate::memory::store::{self, Memory};
 
-/// A retrieved memory plus its similarity score.
+/// 检索到的记忆及其相似度分数。
 pub struct ScoredMemory {
     pub memory: Memory,
     pub score: f32,
 }
 
-/// Embed the query via GLM, then brute-force cosine similarity against every
-/// stored (non-archived) embedding, returning the top-k. Importance is folded
-/// into the score as `score * (0.5 + importance/20)` so a 10/10 memory gets
-/// a 1.0 multiplier and a 1/10 memory gets 0.55.
+/// 通过 GLM 对查询生成嵌入，然后与所有已存储（未归档）的嵌入做暴力余弦相似度，
+/// 返回 Top-K。重要度会折入分数：score * (0.5 + importance/20)，
+/// 因此 10/10 的记忆得到 1.0 倍乘，1/10 的记忆得到 0.55 倍乘。
 pub async fn retrieve(
     pool: &DbPool,
     client: &GlmClient,
@@ -31,8 +30,8 @@ pub async fn retrieve(
         return Ok(Vec::new());
     }
 
-    // Collect (memory_id, weighted_score) pairs first; we hydrate the full
-    // Memory rows only for the top_k survivors to avoid needless DB calls.
+    // 先收集 (memory_id, weighted_score) 对；仅对 Top-K 结果补全完整 Memory 行，
+    // 以避免不必要的数据库查询。
     let mut scored: Vec<(i64, f32)> = candidates
         .into_iter()
         .filter_map(|(memory_id, vec, importance)| {
@@ -41,7 +40,7 @@ pub async fn retrieve(
                 return None;
             }
             let weighted = sim * (0.5 + importance as f32 / 20.0);
-            // Only keep reasonably-relevant hits to avoid noise.
+            // 只保留相关度足够高的结果，避免噪声。
             if sim < 0.2 {
                 return None;
             }
@@ -49,11 +48,11 @@ pub async fn retrieve(
         })
         .collect();
 
-    // Sort by weighted score desc, take top_k.
+    // 按加权分数降序排序，取前 top_k 个。
     scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
     scored.truncate(top_k);
 
-    // Hydrate full memory rows.
+    // 补全完整记忆行。
     let mut out = Vec::with_capacity(scored.len());
     for (memory_id, score) in scored {
         if let Some(memory) = store::get_memory(pool, memory_id)? {
@@ -63,7 +62,7 @@ pub async fn retrieve(
     Ok(out)
 }
 
-/// Cosine similarity for two equal-length f32 vectors.
+/// 两个等长 f32 向量的余弦相似度。
 fn cosine(a: &[f32], b: &[f32]) -> f32 {
     if a.len() != b.len() || a.is_empty() {
         return 0.0;
@@ -84,7 +83,7 @@ fn cosine(a: &[f32], b: &[f32]) -> f32 {
     }
 }
 
-/// Embed a memory's content and persist its vector.
+/// 对记忆内容生成嵌入并持久化其向量。
 pub async fn embed_and_store(
     pool: &DbPool,
     client: &GlmClient,
@@ -97,7 +96,7 @@ pub async fn embed_and_store(
     Ok(())
 }
 
-/// Build the system-prompt context block from retrieved memories.
+/// 从检索到的记忆构建系统提示上下文块。
 pub fn build_memory_context(memories: &[ScoredMemory]) -> String {
     if memories.is_empty() {
         return String::from("（暂无关于用户的记忆）");
