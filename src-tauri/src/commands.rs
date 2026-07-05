@@ -5,7 +5,7 @@ use tauri::State;
 use crate::db::DbPool;
 use crate::llm::{ChatMessage, ChatRequest, GlmClient};
 use crate::memory::rag;
-use crate::memory::store::{self, Memory, MemoryInput};
+use crate::memory::store::{self, Memory, MemoryInput, MemoryLayer};
 use crate::settings::{self, AppSettings};
 
 // ---------- 设置 ----------
@@ -26,8 +26,11 @@ pub fn save_settings(
 // ---------- 记忆 CRUD ----------
 
 #[tauri::command]
-pub fn list_memories(pool: State<'_, DbPool>) -> Result<Vec<Memory>, String> {
-    store::list_memories(&pool).map_err(|e| e.to_string())
+pub fn list_memories(
+    pool: State<'_, DbPool>,
+    layer: Option<MemoryLayer>,
+) -> Result<Vec<Memory>, String> {
+    store::list_memories(&pool, layer).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -257,13 +260,25 @@ pub async fn chat(
         conn.last_insert_rowid()
     };
 
-    // 3) RAG：对用户消息生成嵌入并检索 Top-5 记忆。
-    let retrieved = rag::retrieve(&pool, &client, &settings.embedding_model, &turn.user_message, 5)
-        .await
-        .unwrap_or_else(|e| {
-            log::warn!("RAG retrieve failed: {}", e);
-            Vec::new()
-        });
+    // 3) RAG：对用户消息生成嵌入并检索 Top-K 记忆，按 5 层加权。
+    //    topic 暂不从对话推断（首轮无历史）；后续可加 LLM 话题识别。
+    let retrieve_ctx = rag::RetrieveContext {
+        conversation_id: Some(conversation_id),
+        topic: None,
+    };
+    let retrieved = rag::retrieve(
+        &pool,
+        &client,
+        &settings.embedding_model,
+        &turn.user_message,
+        8,
+        &retrieve_ctx,
+    )
+    .await
+    .unwrap_or_else(|e| {
+        log::warn!("RAG retrieve failed: {}", e);
+        Vec::new()
+    });
     let retrieved_memory_ids: Vec<i64> = retrieved.iter().map(|m| m.memory.id).collect();
     let memory_context = rag::build_memory_context(&retrieved);
 
@@ -324,6 +339,7 @@ pub async fn chat(
             &settings.chat_model,
             &settings.embedding_model,
             &recent,
+            Some(conversation_id),
         )
         .await
         {

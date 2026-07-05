@@ -7,6 +7,7 @@ import type {
   Conversation,
   Memory,
   MemoryInput,
+  MemoryLayer,
 } from "../types";
 
 // ---- 设置 ----
@@ -36,8 +37,9 @@ export const chat = (turn: ChatTurn): Promise<ChatResult> =>
   invoke<ChatResult>("chat", { turn });
 
 // ---- 记忆 CRUD ----
-export const listMemories = (): Promise<Memory[]> =>
-  invoke<Memory[]>("list_memories");
+// layer 可选：传则只拉对应层，不传拉全部。
+export const listMemories = (layer?: MemoryLayer): Promise<Memory[]> =>
+  invoke<Memory[]>("list_memories", { layer: layer ?? null });
 
 export const addMemory = (input: MemoryInput): Promise<Memory> =>
   invoke<Memory>("add_memory", { input });

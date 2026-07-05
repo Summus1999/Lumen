@@ -12,8 +12,16 @@ CREATE TABLE IF NOT EXISTS memories (
   tags        TEXT NOT NULL DEFAULT '[]',         -- 字符串 JSON 数组
   created_at  INTEGER NOT NULL,                   -- Unix 毫秒
   updated_at  INTEGER NOT NULL,
-  archived    INTEGER NOT NULL DEFAULT 0
+  archived    INTEGER NOT NULL DEFAULT 0,
+  -- 5 层分类：personal/technical/preference/session/page
+  -- 默认 preference（中性层，避免旧数据归到 personal 被误保护）
+  layer       TEXT NOT NULL DEFAULT 'preference',
+  -- 仅 session 层使用：关联到具体会话
+  conversation_id INTEGER REFERENCES conversations(id) ON DELETE SET NULL,
+  -- 仅 page 层使用：话题/领域标签，如 "React 项目"
+  topic       TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_memories_layer ON memories(layer, archived);
 
 -- 每条记忆一行，以小端 f32 字节形式存储其嵌入向量。
 CREATE TABLE IF NOT EXISTS embeddings (

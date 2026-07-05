@@ -3,6 +3,14 @@
 
 export type MemorySource = "chat" | "manual";
 
+/** 5 层记忆分类，与后端 MemoryLayer 枚举对应。 */
+export type MemoryLayer =
+  | "personal"
+  | "technical"
+  | "preference"
+  | "session"
+  | "page";
+
 export interface Memory {
   id: number;
   content: string;
@@ -11,8 +19,14 @@ export interface Memory {
   importance: number; // 1..=10
   tags: string[];
   createdAt: number; // Unix 毫秒
-  updatedAt: number; // Unix 毫秒
+  updatedAt: number;
   archived: boolean;
+  /** 5 层分类。 */
+  layer: MemoryLayer;
+  /** 仅 session 层：关联到具体会话。 */
+  conversationId: number | null;
+  /** 仅 page 层：话题/领域标签。 */
+  topic: string | null;
 }
 
 /** 前端用于创建或更新记忆的载荷。 */
@@ -23,6 +37,9 @@ export interface MemoryInput {
   tags?: string[];
   source?: MemorySource;
   archived?: boolean;
+  layer?: MemoryLayer;
+  conversationId?: number | null;
+  topic?: string | null;
 }
 
 export type MessageRole = "system" | "user" | "assistant";
