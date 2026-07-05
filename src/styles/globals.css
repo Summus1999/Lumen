@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* ---- Lumen base styles ---- */
+:root {
+  color-scheme: dark;
+  --lumen-bg: #0f1115;
+  --lumen-panel: #161a21;
+  --lumen-border: #232932;
+  --lumen-accent: #6aa0ff;
+  --lumen-text: #e6e8ec;
+  --lumen-muted: #8b93a1;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--lumen-bg);
+  color: var(--lumen-text);
+  font-family: "Inter", "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui,
+    sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Thin scrollbars to match the dense dashboard feel. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c333d;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a424d;
+}
+
+/* Markdown rendering inside assistant messages. */
+.prose-lumen {
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+.prose-lumen p {
+  margin: 0.4em 0;
+}
+.prose-lumen h1,
+.prose-lumen h2,
+.prose-lumen h3 {
+  margin: 0.8em 0 0.4em;
+  font-weight: 600;
+}
+.prose-lumen ul,
+.prose-lumen ol {
+  margin: 0.4em 0;
+  padding-left: 1.4em;
+}
+.prose-lumen code {
+  background: #1d222b;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.88em;
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+}
+.prose-lumen pre {
+  background: #0c0e12;
+  border: 1px solid var(--lumen-border);
+  padding: 0.8em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.6em 0;
+}
+.prose-lumen pre code {
+  background: transparent;
+  padding: 0;
+}
+.prose-lumen a {
+  color: var(--lumen-accent);
+  text-decoration: none;
+}
+.prose-lumen a:hover {
+  text-decoration: underline;
+}
+.prose-lumen blockquote {
+  border-left: 3px solid var(--lumen-border);
+  margin: 0.5em 0;
+  padding-left: 0.8em;
+  color: var(--lumen-muted);
+}

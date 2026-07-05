@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6aa0ff"/>
+      <stop offset="1" stop-color="#9b6aff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#0f1115"/>
+  <!-- Brain / memory node cluster -->
+  <g fill="none" stroke="url(#g)" stroke-width="14" stroke-linecap="round">
+    <circle cx="256" cy="180" r="34"/>
+    <circle cx="160" cy="300" r="30"/>
+    <circle cx="352" cy="300" r="30"/>
+    <circle cx="256" cy="372" r="26"/>
+    <line x1="256" y1="214" x2="160" y2="270"/>
+    <line x1="256" y1="214" x2="352" y2="270"/>
+    <line x1="160" y1="330" x2="256" y2="346"/>
+    <line x1="352" y1="330" x2="256" y2="346"/>
+  </g>
+  <circle cx="256" cy="180" r="8" fill="#e6e8ec"/>
+  <circle cx="160" cy="300" r="7" fill="#e6e8ec"/>
+  <circle cx="352" cy="300" r="7" fill="#e6e8ec"/>
+  <circle cx="256" cy="372" r="6" fill="#e6e8ec"/>
+</svg>
